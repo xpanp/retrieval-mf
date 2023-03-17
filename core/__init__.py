@@ -1,7 +1,6 @@
 import cv2
 from cv2 import Mat
 from typing import Union, Optional
-from enum import Enum
 
 
 def try_read_image(img: Union[str, Mat]) -> Optional[Mat]:
@@ -25,20 +24,18 @@ class CoreCFG:
 
     def parser(self, cfg):
         self.ALGO_RESIZE = cfg.ALGO_RESIZE
-        self.ALGO_WIDTH = cfg.ALGO_RESIZE
-        self.ALGO_HEIGHT = cfg.ALGO_RESIZE
-        self.VGG_AVG_SIZE = cfg.ALGO_RESIZE
-        self.VGG_MODEL = cfg.ALGO_RESIZE
-        self.VIT_MODEL = cfg.ALGO_RESIZE
-        self.VIT_EXTRACT_AVG = cfg.ALGO_RESIZE
+        self.ALGO_WIDTH = cfg.ALGO_WIDTH
+        self.ALGO_HEIGHT = cfg.ALGO_HEIGHT
+        self.VGG_AVG_SIZE = cfg.VGG_AVG_SIZE
+        self.VGG_MODEL = cfg.VGG_MODEL
+        self.VIT_MODEL = cfg.VIT_MODEL
+        self.VIT_EXTRACT_AVG = cfg.VIT_EXTRACT_AVG
 
 
 core_cfg = CoreCFG()
 
-
-class AlgoName(Enum):
-    COLOR = "color"
-    GLCM = "glcm"
-    LBP = "lbp"
-    VGG = "vgg"
-    VIT = "vit"
+ALGO_COLOR = "color"
+ALGO_GLCM = "glcm"
+ALGO_LBP = "lbp"
+ALGO_VGG = "vgg"
+ALGO_VIT = "vit"

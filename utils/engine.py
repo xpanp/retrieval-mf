@@ -6,6 +6,9 @@ class EngineLock:
         引擎管理模块，传入初始化好的多个引擎模块。
         每次需要处理时调用process()函数并传入待处理数据。
         若存在可用handle则进行处理，若不存在可用handle则抛出异常。
+
+        当存在大量数据需要连续处理时，可以通过get_handle()获取handle后，
+        循环调用_process()函数进行处理，最后需调用free_handle()释放handle。
     '''
     def __init__(self, engines:list) -> None:
         self.max_worker_num = len(engines)

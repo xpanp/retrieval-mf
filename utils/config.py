@@ -9,7 +9,6 @@ class RMFConfig:
     CUDA_VISIBLE_DEVICES = 0
 
     DEBUG = False
-    ACCESS_LOG = True
 
     ALGO_RESIZE = 248
     ALGO_WIDTH = 224
@@ -40,9 +39,7 @@ class RMFConfig:
         self.CUDA_VISIBLE_DEVICES = config.getint(
             "server", "CUDA_VISIBLE_DEVICES", fallback=self.CUDA_VISIBLE_DEVICES)
 
-        self.DEBUG = config.getboolean("sanic", "DEBUG", fallback=self.DEBUG)
-        self.ACCESS_LOG = config.getboolean(
-            "sanic", "ACCESS_LOG", fallback=self.ACCESS_LOG)
+        self.DEBUG = config.getboolean("flask", "DEBUG", fallback=self.DEBUG)
         
         self.ALGO_RESIZE = config.getint("engine", "ALGO_RESIZE", fallback=self.ALGO_RESIZE)
         self.ALGO_WIDTH = config.getint("engine", "ALGO_WIDTH", fallback=self.ALGO_WIDTH)

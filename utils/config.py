@@ -25,9 +25,15 @@ class RMFConfig:
     DB_NAME = "rmf"
 
     def __init__(self) -> None:
-        pass
+        # DSN Data Source Name
+        self.DSN = "mysql+pymysql://{}:{}@{}:{}/{}?charset=utf8mb4".format(
+            self.DB_USER, self.DB_PASSWD, self.DB_HOST, self.DB_PORT, self.DB_NAME
+        )
 
     def parser(self, cfg: str):
+        '''
+            使用配置文件覆盖默认参数
+        '''
         config = configparser.ConfigParser()
         config.read(cfg, encoding='utf-8')
         print("read cfg: ", cfg)
@@ -55,6 +61,10 @@ class RMFConfig:
         self.DB_USER = config.get("db", "DB_USER", fallback=self.DB_USER)
         self.DB_PASSWD = config.get("db", "DB_PASSWD", fallback=self.DB_PASSWD)
         self.DB_NAME = config.get("db", "DB_NAME", fallback=self.DB_NAME)
+        # DSN Data Source Name
+        self.DSN = "mysql+pymysql://{}:{}@{}:{}/{}?charset=utf8mb4".format(
+            self.DB_USER, self.DB_PASSWD, self.DB_HOST, self.DB_PORT, self.DB_NAME
+        )
 
 
 cfg = RMFConfig()

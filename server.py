@@ -3,6 +3,7 @@ from flask import Flask
 
 from utils.config import cfg
 from engine_manage import engineM
+from dao.orm_mysql import db
 
 app = Flask("rmf")
 
@@ -45,7 +46,10 @@ def get_args():
 def main():
     args = get_args()
     cfg.parser(args.c)
+    # 特征提取引擎初始化
     engineM.init(cfg)
+    # 数据库初始化
+    db.init(cfg.DSN)
 
     app.run(host=cfg.HOST, port=cfg.PORT, debug=cfg.DEBUG)
 

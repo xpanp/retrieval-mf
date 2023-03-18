@@ -20,7 +20,10 @@ from sqlalchemy_utils import database_exists, create_database
 Base = declarative_base()
 
 class DB():
-    def __init__(self, url) -> None:
+    def __init__(self) -> None:
+        pass
+
+    def init(self, url:str):
         # 创建引擎
         self.engine = create_engine(
             url,
@@ -123,12 +126,22 @@ class DB():
         finally:
             self.session.close()
         
+        '''
+            由于是从内存中搜索到数据后，才会从数据库中获取数据
+            因此一定有且仅有一条数据被搜索到
+        '''
         assert(len(result) == 1)
         return result[0]
+    
+
+db = DB()
 
 
 class DATA_VECTOR(Base):
-    """ 必须继承Base """
+    """
+        定义表的相关信息
+        必须继承Base
+    """
     # 数据库中存储的表名
     __tablename__ = "DATA_VECTOR"
     # 对于必须插入的字段，采用nullable=False进行约束，它相当于NOT NULL

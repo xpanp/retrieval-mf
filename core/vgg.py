@@ -2,7 +2,7 @@ import torch
 import timm
 
 from .model import Model
-from . import *
+from .utils import CoreCFG
 
 FEAT_DIM = 512
 

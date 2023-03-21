@@ -1,6 +1,5 @@
 from utils import engine, config
-from core import color, glcm, lbp, vgg, vit
-from core import *
+from core import color, glcm, lbp, vgg, vit, AlgoType, core_cfg
 
 class EngineManager:
     def __init__(self) -> None:
@@ -54,11 +53,11 @@ class EngineManager:
             引擎字典，便于通过算法名称来调用
         '''
         self.engine_map = {
-            ALGO_COLOR: self.engine_color,
-            ALGO_GLCM: self.engine_glcm,
-            ALGO_LBP: self.engine_lbp,
-            ALGO_VGG: self.engine_vgg,
-            ALGO_VIT: self.engine_vit,
+            AlgoType.COLOR: self.engine_color,
+            AlgoType.GLCM: self.engine_glcm,
+            AlgoType.LBP: self.engine_lbp,
+            AlgoType.VGG: self.engine_vgg,
+            AlgoType.VIT: self.engine_vit,
         }
         print("EngineManager engine_map:", self.engine_map)
     

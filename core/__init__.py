@@ -1,41 +1,29 @@
-import cv2
-from cv2 import Mat
-from typing import Union, Optional
+from enum import Enum
 
-
-def try_read_image(img: Union[str, Mat]) -> Optional[Mat]:
-    # 将图片路径转换为Mat
-    if isinstance(img, str):
-        img = cv2.imread(img)
-    return img
-
-
-class CoreCFG:
-    ALGO_RESIZE = 248
-    ALGO_WIDTH = 224
-    ALGO_HEIGHT = 224
-    VGG_AVG_SIZE = 7
-    VGG_MODEL = "vgg16"
-    VIT_MODEL = "vit_base_patch16_224"
-    VIT_EXTRACT_AVG = False
-
-    def __init__(self) -> None:
-        pass
-
-    def parser(self, cfg):
-        self.ALGO_RESIZE = cfg.ALGO_RESIZE
-        self.ALGO_WIDTH = cfg.ALGO_WIDTH
-        self.ALGO_HEIGHT = cfg.ALGO_HEIGHT
-        self.VGG_AVG_SIZE = cfg.VGG_AVG_SIZE
-        self.VGG_MODEL = cfg.VGG_MODEL
-        self.VIT_MODEL = cfg.VIT_MODEL
-        self.VIT_EXTRACT_AVG = cfg.VIT_EXTRACT_AVG
-
+from . import color
+from . import glcm
+from . import lbp
+from . import vgg
+from . import vit
+from .utils import CoreCFG
 
 core_cfg = CoreCFG()
 
-ALGO_COLOR = "color"
-ALGO_GLCM = "glcm"
-ALGO_LBP = "lbp"
-ALGO_VGG = "vgg"
-ALGO_VIT = "vit"
+class AlgoType(Enum):
+    COLOR = "color"
+    GLCM = "glcm"
+    LBP = "lbp"
+    VGG = "vgg"
+    VIT = "vit"
+
+algo_dim_map = {
+    AlgoType.COLOR: color.FEAT_DIM,
+    AlgoType.GLCM: glcm.FEAT_DIM,
+    AlgoType.LBP: lbp.FEAT_DIM,
+    AlgoType.VGG: vgg.FEAT_DIM,
+    AlgoType.VIT: vit.FEAT_DIM,
+}
+
+def get_dim(algo:AlgoType) -> int:
+    return algo_dim_map[algo]
+

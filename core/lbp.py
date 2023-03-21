@@ -1,8 +1,11 @@
 # copy from https://github.com/1044197988/Python-Image-feature-extraction.git
+import cv2
+from cv2 import Mat
+from typing import Union
 import numpy as np
 import torch
 
-from . import *
+from .utils import try_read_image
 
 FEAT_DIM = 256
 

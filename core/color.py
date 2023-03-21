@@ -1,6 +1,10 @@
-from . import *
+import cv2
+from cv2 import Mat
+from typing import Union
 import numpy as np
 import torch
+
+from .utils import try_read_image
 
 FEAT_DIM = 256
 

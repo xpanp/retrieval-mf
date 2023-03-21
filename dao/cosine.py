@@ -33,6 +33,7 @@ class Cosine:
                 # [embeddings, ] 
                 [[random() for j in range(dim)] for i in range(num_entities)],    
             ]
+            TODO 插入需要加锁
         '''
         for i in range(len(entities[1])):
             if len(entities[1][i]) == self.dim:
@@ -40,6 +41,13 @@ class Cosine:
                 self.feats.append(torch.Tensor(entities[1][i]))
 
     def search(self, vector: List[float], limit: int = 12) -> tuple[List[float], List[int]]:
+        '''
+            search, 使用单组向量进行检索
+            vector: 待检索向量，len必须等于self.dim
+            limit: 限制返回数量，返回结果不超limit
+
+            return: scores为得分列表，indexs为相应的ID
+        '''
         if len(vector) != self.dim:
             raise TypeError(f"vector's dim must be {self.dim}")
         results = []

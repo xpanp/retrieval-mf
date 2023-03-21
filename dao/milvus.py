@@ -86,7 +86,10 @@ class Milvus:
     def search(self, vector: List[float], limit: int = 12) -> tuple[List[float], List[int]]:
         '''
             search, 使用单组向量进行检索
-            返回按距离排序
+            vector: 待检索向量，len必须等于self.dim
+            limit: 限制返回数量，返回结果不超limit
+
+            return: scores为得分列表，indexs为相应的ID
         '''
         search_params = {
             "metric_type": "L2",

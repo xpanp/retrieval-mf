@@ -4,9 +4,10 @@ from flask_cors import CORS
 
 from utils.config import cfg
 from engine_manage import engineM
-from dao.orm_mysql import db
+from dao.db_manage import db_m
 
 app = Flask("rmf")
+# 设置允许跨域
 CORS(app, supports_credentials=True)
 
 
@@ -50,6 +51,8 @@ def main():
     cfg.parser(args.c)
     # 特征提取引擎初始化
     engineM.init(cfg)
+    # 数据库模块初始化
+    db_m.init(cfg)
 
     app.run(host=cfg.HOST, port=cfg.PORT, debug=cfg.DEBUG)
 

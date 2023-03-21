@@ -18,11 +18,17 @@ class RMFConfig:
     VIT_MODEL = "vit_base_patch16_224"
     VIT_EXTRACT_AVG = False
 
+    # support milvus|cosine
+    CMP_MODE = "milvus"
+
     DB_HOST = "127.0.0.1"
     DB_PORT = 3306
     DB_USER = "root"
     DB_PASSWD = "LWsVjzKIO0FTdA=="
     DB_NAME = "rmf"
+
+    MILVUS_HOST = "127.0.0.1"
+    MILVUS_PORT = 19530
 
     def __init__(self) -> None:
         # DSN Data Source Name
@@ -55,6 +61,8 @@ class RMFConfig:
         self.VIT_MODEL = config.get("engine", "VIT_MODEL", fallback=self.VIT_MODEL)
         self.VIT_EXTRACT_AVG = config.getboolean(
             "engine", "VIT_EXTRACT_AVG", fallback=self.VIT_EXTRACT_AVG)
+        
+        self.CMP_MODE = config.get("compare", "CMP_MODE", fallback=self.CMP_MODE)
 
         self.DB_HOST = config.get("db", "DB_HOST", fallback=self.DB_HOST)
         self.DB_PORT = config.getint("db", "DB_PORT", fallback=self.DB_PORT)
@@ -65,6 +73,9 @@ class RMFConfig:
         self.DSN = "mysql+pymysql://{}:{}@{}:{}/{}?charset=utf8mb4".format(
             self.DB_USER, self.DB_PASSWD, self.DB_HOST, self.DB_PORT, self.DB_NAME
         )
+
+        self.MILVUS_HOST = config.get("milvus", "MILVUS_HOST", fallback=self.MILVUS_HOST)
+        self.MILVUS_PORT = config.getint("milvus", "MILVUS_PORT", fallback=self.MILVUS_PORT)
 
 
 cfg = RMFConfig()

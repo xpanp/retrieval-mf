@@ -16,6 +16,8 @@ class AlgoType(Enum):
     VGG = "vgg"
     VIT = "vit"
 
+algo_list = [AlgoType.COLOR, AlgoType.GLCM, AlgoType.LBP, AlgoType.VGG, AlgoType.VIT]
+
 algo_dim_map = {
     AlgoType.COLOR: color.FEAT_DIM,
     AlgoType.GLCM: glcm.FEAT_DIM,

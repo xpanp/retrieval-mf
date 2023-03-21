@@ -54,8 +54,8 @@ class MySQL():
         # 内部会采用threading.local进行隔离
         self.session = scoped_session(self.Session)
 
-    def insert(self, filename:str, filepath:str, filepath_samll:str, color:List[float],
-               glcm:List[float], lbp:List[float], vgg:List[float], vit:List[float]):
+    def insert(self, filename:str, filepath:str, filepath_small:str, color:List[float],
+               glcm:List[float], lbp:List[float], vgg:List[float], vit:List[float]) -> int:
         color = struct.pack('%sf' % len(color), *color)
         glcm = struct.pack('%sf' % len(glcm), *glcm)
         lbp = struct.pack('%sf' % len(lbp), *lbp)
@@ -64,7 +64,7 @@ class MySQL():
         instance = DATA_VECTOR(
             filename=filename,
             filepath=filepath,
-            filepath_small=filepath_samll,
+            filepath_small=filepath_small,
             color=color,
             glcm=glcm,
             lbp=lbp,
@@ -74,45 +74,51 @@ class MySQL():
         try:
             self.session.add(instance)
             self.session.commit()
+            id = instance.id
         except Exception as e:
             self.session.rollback()
             print("insert failed, ", filename, e)
             raise e
         finally:
             self.session.close()
+        return id
 
-    def select_all(self) -> List[list]:
+    def select_all(self) -> List[List]:
+        '''
+            select所有向量数据
+            以列的方式返回所有数据，便于比对数据库将数据载入内存中
+            算法特征返回顺序参照core.algo_list，将ids放在最后一位
+        '''
         try:
-            result = self.session.query(DATA_VECTOR.id, DATA_VECTOR.filename, DATA_VECTOR.filepath, DATA_VECTOR.filepath_small,
-                                        DATA_VECTOR.color, DATA_VECTOR.glcm, DATA_VECTOR.lbp, 
-                                        DATA_VECTOR.vgg, DATA_VECTOR.vit).all()
+            result = self.session.query(DATA_VECTOR.id, DATA_VECTOR.color, DATA_VECTOR.glcm, 
+                                        DATA_VECTOR.lbp, DATA_VECTOR.vgg, DATA_VECTOR.vit).all()
         except Exception as e:
             print("select fail", e)
         finally:
             self.session.close()
         
-        ress = []
+        ids = []    # List[int]
+        colors = [] # List[List[float]]
+        glcms = []  # List[List[float]]
+        lbps = []   # List[List[float]]
+        vggs = []   # List[List[float]]
+        vits = []   # List[List[float]]
         for r in result:
-            res = []
             try:
-                res.append(r[0])
-                res.append(r[1])
-                res.append(r[2])
-                res.append(r[3])
-                color = list(struct.unpack('{}f'.format(int(len(r[4])/4)), r[4]))
-                res.append(color)
-                glcm = list(struct.unpack('{}f'.format(int(len(r[5])/4)), r[5]))
-                res.append(glcm)
-                lbp = list(struct.unpack('{}f'.format(int(len(r[6])/4)), r[6]))
-                res.append(lbp)
-                vgg = list(struct.unpack('{}f'.format(int(len(r[7])/4)), r[7]))
-                res.append(vgg)
-                vit = list(struct.unpack('{}f'.format(int(len(r[8])/4)), r[8]))
-                res.append(vit)
+                ids.append(r[0])
+                color = list(struct.unpack('{}f'.format(int(len(r[1])/4)), r[1]))
+                colors.append(color)
+                glcm = list(struct.unpack('{}f'.format(int(len(r[2])/4)), r[2]))
+                glcms.append(glcm)
+                lbp = list(struct.unpack('{}f'.format(int(len(r[3])/4)), r[3]))
+                lbps.append(lbp)
+                vgg = list(struct.unpack('{}f'.format(int(len(r[4])/4)), r[4]))
+                vggs.append(vgg)
+                vit = list(struct.unpack('{}f'.format(int(len(r[5])/4)), r[5]))
+                vits.append(vit)
             except Exception as e:
                 print("struct.unpack error:", e)
-            ress.append(res)
-        return ress
+        return [colors, glcms, lbps, vggs, vits, ids]
 
     def select_one(self, id:int) -> tuple:
         try:

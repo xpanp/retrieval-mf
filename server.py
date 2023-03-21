@@ -1,11 +1,13 @@
 import argparse
 from flask import Flask
+from flask_cors import CORS
 
 from utils.config import cfg
 from engine_manage import engineM
 from dao.orm_mysql import db
 
 app = Flask("rmf")
+CORS(app, supports_credentials=True)
 
 
 def retrieval():
@@ -48,8 +50,6 @@ def main():
     cfg.parser(args.c)
     # 特征提取引擎初始化
     engineM.init(cfg)
-    # 数据库初始化
-    db.init(cfg.DSN)
 
     app.run(host=cfg.HOST, port=cfg.PORT, debug=cfg.DEBUG)
 

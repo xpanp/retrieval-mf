@@ -19,7 +19,7 @@ from sqlalchemy_utils import database_exists, create_database
 # 基础类
 Base = declarative_base()
 
-class DB():
+class MySQL():
     def __init__(self) -> None:
         pass
 
@@ -62,14 +62,14 @@ class DB():
         vgg = struct.pack('%sf' % len(vgg), *vgg)
         vit = struct.pack('%sf' % len(vit), *vit)
         instance = DATA_VECTOR(
-            FILENAME=filename,
-            FILEPATH=filepath,
-            FILEPATH_SMALL=filepath_samll,
-            COLORFEAT=color,
-            GLCMFEAT=glcm,
-            LBPFEAT=lbp,
-            VGGFEAT=vgg,
-            VITFEAT=vit,
+            filename=filename,
+            filepath=filepath,
+            filepath_small=filepath_samll,
+            color=color,
+            glcm=glcm,
+            lbp=lbp,
+            vgg=vgg,
+            vit=vit,
         )
         try:
             self.session.add(instance)
@@ -83,9 +83,9 @@ class DB():
 
     def select_all(self) -> List[list]:
         try:
-            result = self.session.query(DATA_VECTOR.ID, DATA_VECTOR.FILENAME, DATA_VECTOR.FILEPATH, DATA_VECTOR.FILEPATH_SMALL,
-                                        DATA_VECTOR.COLORFEAT, DATA_VECTOR.GLCMFEAT, DATA_VECTOR.LBPFEAT, 
-                                        DATA_VECTOR.VGGFEAT, DATA_VECTOR.VITFEAT).all()
+            result = self.session.query(DATA_VECTOR.id, DATA_VECTOR.filename, DATA_VECTOR.filepath, DATA_VECTOR.filepath_small,
+                                        DATA_VECTOR.color, DATA_VECTOR.glcm, DATA_VECTOR.lbp, 
+                                        DATA_VECTOR.vgg, DATA_VECTOR.vit).all()
         except Exception as e:
             print("select fail", e)
         finally:
@@ -117,9 +117,9 @@ class DB():
     def select_one(self, id:int) -> tuple:
         try:
             result = self.session.query(
-                DATA_VECTOR.FILENAME, DATA_VECTOR.FILEPATH, DATA_VECTOR.FILEPATH_SMALL
+                DATA_VECTOR.filename, DATA_VECTOR.filepath, DATA_VECTOR.filepath_small
             ).filter(
-                DATA_VECTOR.ID == id
+                DATA_VECTOR.id == id
             ).all()
         except Exception as e:
             print("select fail", e)
@@ -132,9 +132,7 @@ class DB():
         '''
         assert(len(result) == 1)
         return result[0]
-    
 
-db = DB()
 
 
 class DATA_VECTOR(Base):
@@ -145,17 +143,17 @@ class DATA_VECTOR(Base):
     # 数据库中存储的表名
     __tablename__ = "DATA_VECTOR"
     # 对于必须插入的字段，采用nullable=False进行约束，它相当于NOT NULL
-    ID = Column(Integer, primary_key=True, autoincrement=True, comment="主键")
-    FILENAME = Column(String(64), unique=True, nullable=False, comment="图片名称")
-    FILEPATH = Column(String(256), nullable=False, comment="图片地址")
-    FILEPATH_SMALL = Column(String(256), nullable=False, comment="缩略图地址")
+    id = Column(Integer, primary_key=True, autoincrement=True, comment="主键")
+    filename = Column(String(64), index=True, unique=True, nullable=False, comment="图片名称")
+    filepath = Column(String(256), nullable=False, comment="图片地址")
+    filepath_small = Column(String(256), nullable=False, comment="缩略图地址")
 
     # 对于非必须插入的字段，不用采取nullable=False进行约束
-    COLORFEAT = Column(LargeBinary, comment="color特征向量")
-    GLCMFEAT = Column(LargeBinary, comment="glcm特征向量")
-    LBPFEAT = Column(LargeBinary, comment="lbp特征向量")
-    VGGFEAT = Column(LargeBinary, comment="vgg特征向量")
-    VITFEAT = Column(LargeBinary, comment="vit特征向量")
+    color = Column(LargeBinary, comment="color特征向量")
+    glcm = Column(LargeBinary, comment="glcm特征向量")
+    lbp = Column(LargeBinary, comment="lbp特征向量")
+    vgg = Column(LargeBinary, comment="vgg特征向量")
+    vit = Column(LargeBinary, comment="vit特征向量")
     create_time = Column(
         DateTime, default=datetime.datetime.now, comment="创建时间")
     last_update_time = Column(
@@ -164,9 +162,9 @@ class DATA_VECTOR(Base):
                            comment="是否删除")
 
     # __table__args__ = (
-    #     UniqueConstraint("FILENAME"),  # 联合唯一约束
-    #     Index("ID", "FILENAME", unique=True),  # 联合唯一索引
+    #     UniqueConstraint("filename"),  # 联合唯一约束
+    #     Index("id", "filename", unique=True),  # 联合唯一索引
     # )
 
     def __str__(self):
-        return f"object : <ID:{self.ID} FILENAME:{self.FILENAME}>"
+        return f"object : <id:{self.id} filename:{self.filename}>"

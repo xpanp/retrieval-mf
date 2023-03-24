@@ -1,4 +1,5 @@
 import configparser
+import os
 
 
 class RMFConfig:
@@ -7,8 +8,9 @@ class RMFConfig:
     NUM_WORKERS = 1
     # cpu -1, others gpuid
     CUDA_VISIBLE_DEVICES = 0
-
     DEBUG = False
+    TMP_DIR = "tmp"
+    FILE_SERVER_URL = "http://127.0.0.1:8001/"
 
     ALGO_RESIZE = 248
     ALGO_WIDTH = 224
@@ -50,8 +52,9 @@ class RMFConfig:
             "server", "NUM_WORKERS", fallback=self.NUM_WORKERS)
         self.CUDA_VISIBLE_DEVICES = config.getint(
             "server", "CUDA_VISIBLE_DEVICES", fallback=self.CUDA_VISIBLE_DEVICES)
-
-        self.DEBUG = config.getboolean("flask", "DEBUG", fallback=self.DEBUG)
+        self.DEBUG = config.getboolean("server", "DEBUG", fallback=self.DEBUG)
+        self.TMP_DIR = config.get("server", "TMP_DIR", fallback=self.TMP_DIR)
+        self.FILE_SERVER_URL = config.get("server", "FILE_SERVER_URL", fallback=self.FILE_SERVER_URL)
         
         self.ALGO_RESIZE = config.getint("engine", "ALGO_RESIZE", fallback=self.ALGO_RESIZE)
         self.ALGO_WIDTH = config.getint("engine", "ALGO_WIDTH", fallback=self.ALGO_WIDTH)
@@ -76,6 +79,12 @@ class RMFConfig:
 
         self.MILVUS_HOST = config.get("milvus", "MILVUS_HOST", fallback=self.MILVUS_HOST)
         self.MILVUS_PORT = config.getint("milvus", "MILVUS_PORT", fallback=self.MILVUS_PORT)
+
+        self.init_dir()
+
+    def init_dir(self):
+        if not os.path.exists(self.TMP_DIR):
+            os.makedirs(self.TMP_DIR)
 
 
 cfg = RMFConfig()

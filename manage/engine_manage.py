@@ -1,7 +1,15 @@
+from typing import Union
+import torch
+from cv2 import Mat
+
 from utils import engine, config
 from core import color, glcm, lbp, vgg, vit, AlgoType, core_cfg
 
 class EngineManager:
+    '''
+        批量管理所有算法引擎，根据引擎名来调用引擎
+        若不存在可用的handle则调用失败
+    '''
     def __init__(self) -> None:
         self.engine_color = None
         self.engine_glcm = None
@@ -61,10 +69,15 @@ class EngineManager:
         }
         print("EngineManager engine_map:", self.engine_map)
     
-    def process(self, algo_name, data):
-        return self.engine_map[algo_name](data)
+    def process(self, algo: AlgoType, data: Union[str, Mat]) -> torch.Tensor:
+        '''
+            algo：指定使用的特征提取算法
+            data：图片路径或已经加载的图片buf
+            return：Tensor
+        '''
+        return self.engine_map[algo](data)
 
-    def __call__(self, algo_name, data):
-        return self.process(algo_name, data)
+    def __call__(self, algo: AlgoType, data: Union[str, Mat]) -> torch.Tensor:
+        return self.process(algo, data)
 
-engineM = EngineManager()
+engine_m = EngineManager()

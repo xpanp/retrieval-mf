@@ -102,7 +102,7 @@ class Milvus:
         scores = []
         indexs = []
         for hit in result[0]:
-            scores.append(hit.score)
+            scores.append(float(hit.score))
             indexs.append(hit.id)
         return scores, indexs
 

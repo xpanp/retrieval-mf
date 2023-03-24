@@ -9,7 +9,7 @@ from typing import List
     在类外单独进行管理。需要注意数据一致性问题。
 '''
 
-def compare(k:torch.Tensor, f:torch.Tensor):
+def compare(k:torch.Tensor, f:torch.Tensor) -> torch.Tensor:
     return torch.cosine_similarity(k, f, dim=0)
 
 class Cosine:
@@ -53,7 +53,7 @@ class Cosine:
         results = []
         for i in range(len(self.feats)):
             score = compare(torch.Tensor(vector), self.feats[i])
-            results.append((score, i))
+            results.append((float(score), i))
         results.sort(key=lambda elem:elem[0], reverse=True)
         scores = []
         indexs = []

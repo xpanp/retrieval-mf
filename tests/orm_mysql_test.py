@@ -16,7 +16,7 @@ if database_exists(dsn):
 db = MySQL()
 db.init(dsn)
 
-id = db.insert(filename="test.jpg", filepath="http://127.0.0.1/test.jpg", filepath_small="http://127.0.0.1/test_small.jpg",
+id = db.insert(filename="test.jpg", filepath="http://127.0.0.1/test.jpg", filepath_thumbnail="http://127.0.0.1/test_small.jpg",
           color=random_list(4), glcm=random_list(4), lbp=random_list(0), vgg=random_list(4), vit=random_list(4))
 print("------------------------------")
 print("insert id:", id)

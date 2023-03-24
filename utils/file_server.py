@@ -1,5 +1,6 @@
-from flask import Flask, request, send_file
+from flask import Flask, Response, request, send_file
 import os
+import json
 
 '''
     一个简易的http文件服务器，仅供该项目内部使用，
@@ -12,7 +13,7 @@ import os
 # 资源文件夹位置
 resource_dir = "resource"
 host = "0.0.0.0"
-port = 8000
+port = 8001
 
 app = Flask(__name__)
 
@@ -36,6 +37,12 @@ def index():
 
 @app.route('/upload', methods=['POST'])
 def upload():
+    '''
+        返回的url字段不是可以直接下载使用的url，而是文件的相对路径。
+
+        考虑到文件服务器可能被nginx代理，或添加https，因此实际的url
+        由调用者自行拼接。
+    '''
     file = request.files['file']
     filename = file.filename
     dir = request.form['dir']
@@ -45,12 +52,13 @@ def upload():
     filename = os.path.join(dir, filename)
     print("save to:", filename)
     file.save(filename)
-    return 'upload success'
+    return Response(json.dumps({"url": filename}), status=200, mimetype='application/json')
 
 
 @app.route('/download/<path:filename>')
 def download(filename):
-    return send_file(os.path.join(resource_dir, filename))
+    print(f'download: {filename}')
+    return send_file(filename)
 
 
 if __name__ == '__main__':

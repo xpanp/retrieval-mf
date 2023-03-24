@@ -54,7 +54,7 @@ class MySQL():
         # 内部会采用threading.local进行隔离
         self.session = scoped_session(self.Session)
 
-    def insert(self, filename:str, filepath:str, filepath_small:str, color:List[float],
+    def insert(self, filename:str, filepath:str, filepath_thumbnail:str, color:List[float],
                glcm:List[float], lbp:List[float], vgg:List[float], vit:List[float]) -> int:
         color = struct.pack('%sf' % len(color), *color)
         glcm = struct.pack('%sf' % len(glcm), *glcm)
@@ -64,7 +64,7 @@ class MySQL():
         instance = DATA_VECTOR(
             filename=filename,
             filepath=filepath,
-            filepath_small=filepath_small,
+            filepath_thumbnail=filepath_thumbnail,
             color=color,
             glcm=glcm,
             lbp=lbp,
@@ -123,7 +123,7 @@ class MySQL():
     def select_one(self, id:int) -> tuple:
         try:
             result = self.session.query(
-                DATA_VECTOR.filename, DATA_VECTOR.filepath, DATA_VECTOR.filepath_small
+                DATA_VECTOR.filename, DATA_VECTOR.filepath, DATA_VECTOR.filepath_thumbnail
             ).filter(
                 DATA_VECTOR.id == id
             ).all()
@@ -152,7 +152,7 @@ class DATA_VECTOR(Base):
     id = Column(Integer, primary_key=True, autoincrement=True, comment="主键")
     filename = Column(String(64), index=True, unique=True, nullable=False, comment="图片名称")
     filepath = Column(String(256), nullable=False, comment="图片地址")
-    filepath_small = Column(String(256), nullable=False, comment="缩略图地址")
+    filepath_thumbnail = Column(String(256), nullable=False, comment="缩略图地址")
 
     # 对于非必须插入的字段，不用采取nullable=False进行约束
     color = Column(LargeBinary, comment="color特征向量")

@@ -2,11 +2,13 @@ torch==1.10.1
 torchvision==0.11.2
 torchaudio==0.10.1
 timm == 0.6.12
-opencv-python
-scikit-image
-flask
-flask_cors
-sqlalchemy
-sqlalchemy_utils
-pymysql
+opencv-python==4.7.0.72
+scikit-image==0.20.0
+flask==2.2.3
+flask_cors==3.0.10
+sqlalchemy==2.0.6
+sqlalchemy_utils==0.40.0
+pymysql==1.0.2
 pymilvus==2.2.3
+wtforms==3.0.1
+flask_wtf==1.1.1

@@ -1,9 +1,12 @@
 import threading
+from typing import Union
+import torch
+from cv2 import Mat
 
 
 class EngineLock:
     '''
-        引擎管理模块，传入初始化好的多个引擎模块。
+        引擎管理模块，传入初始化好的同一类算法的多个引擎实例。
         每次需要处理时调用process()函数并传入待处理数据。
         若存在可用handle则进行处理，若不存在可用handle则抛出异常。
 
@@ -41,7 +44,7 @@ class EngineLock:
         self.lock.release()
 
     # 返回单张图片识别结果, 不加锁
-    def _process(self, handle:int, data):
+    def _process(self, handle:int, data: Union[str, Mat]) -> torch.Tensor:
         try:
             if handle < 0:
                 raise ValueError("Can't get handle!")
@@ -50,7 +53,7 @@ class EngineLock:
             raise e
         return res
 
-    def process(self, data):
+    def process(self, data: Union[str, Mat]) -> torch.Tensor:
         handle = self.get_handle()
         try:
             res = self._process(handle, data)
@@ -60,5 +63,5 @@ class EngineLock:
             self.free_handle(handle)
         return res
     
-    def __call__(self, data):
+    def __call__(self, data: Union[str, Mat]) -> torch.Tensor:
         return self.process(data)

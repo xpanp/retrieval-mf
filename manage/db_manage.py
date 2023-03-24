@@ -1,11 +1,12 @@
 from enum import Enum
 from typing import List
 
-from .orm_mysql import MySQL
-from .cosine import Cosine
-from .milvus import Milvus, connect
-from ..utils.config import RMFConfig
-from ..core import AlgoType, algo_list, get_dim
+from dao.orm_mysql import MySQL
+from dao.cosine import Cosine
+from dao.milvus import Milvus, connect
+from utils.config import RMFConfig, cfg
+from core import AlgoType, algo_list, get_dim
+from utils.file_client import get_download_url
 
 
 class CMPTYPE(Enum):
@@ -26,13 +27,13 @@ class DBManager:
     def init(self, cfg: RMFConfig):
         self.mysql.init(cfg.DSN)
 
-        if cfg.CMP_MODE == CMPTYPE.MILVUS:
+        if cfg.CMP_MODE == CMPTYPE.MILVUS.value:
             # 与milvus数据库建连
             connect(cfg.MILVUS_HOST, cfg.MILVUS_PORT)
             print("milvus: start init and load vector to memory")
             self.milvus_init(cfg.DB_NAME)
             print("milvus: init success")
-        elif cfg.CMP_MODE == CMPTYPE.COSINE:
+        elif cfg.CMP_MODE == CMPTYPE.COSINE.value:
             print("cosine: start init")
             self.cosine_init(cfg.DB_NAME)
             # 将数据库中数据加载到内存中
@@ -46,11 +47,11 @@ class DBManager:
             collection_name = db_name + "_" + algo_name
         '''
         for algo in algo_list:
-            self.cmp_map[algo] = Milvus(db_name + "_" + algo, get_dim(algo))
+            self.cmp_map[algo] = Milvus(db_name + "_" + algo.value, get_dim(algo))
 
     def cosine_init(self, db_name: str):
         for algo in algo_list:
-            self.cmp_map[algo] = Cosine(db_name + "_" + algo, get_dim(algo))
+            self.cmp_map[algo] = Cosine(db_name + "_" + algo.value, get_dim(algo))
 
     def cosine_load(self):
         '''
@@ -64,22 +65,21 @@ class DBManager:
             self.cmp_map[algo].insert([result[-1], result[i]])
         print("cosine: load success")
 
-    def insert(self, filename: str, filepath: str, filepath_small: str, color: List[float],
-               glcm: List[float], lbp: List[float], vgg: List[float], vit: List[float]):
-        '''
-            参数列表过长虽然不推荐，但是可以很清楚的看到需要的字段以及代表的含义
-        '''
+    def insert(self, filename: str, filepath: str, filepath_thumbnail: str, vectors: List[List[float]]):
         # 插入mysql
         id = self.mysql.insert(
-            filename, filepath, filepath_small, color, glcm, lbp, vgg, vit)
+            filename, filepath, filepath_thumbnail, 
+            vectors[0], vectors[1], vectors[2], vectors[3], vectors[4])
         # 将数据加入向量数据库
-        self.cmp_map[AlgoType.COLOR].insert([[id], [color]])
-        self.cmp_map[AlgoType.GLCM].insert([[id], [glcm]])
-        self.cmp_map[AlgoType.LBP].insert([[id], [lbp]])
-        self.cmp_map[AlgoType.VGG].insert([[id], [vgg]])
-        self.cmp_map[AlgoType.VIT].insert([[id], [vit]])
+        for i, algo in enumerate(algo_list):
+            self.cmp_map[algo].insert([[id], [vectors[i]]])
 
     def search(self, algo: AlgoType, vector: List[float], limit: int = 12) -> List[dict]:
+        '''
+            不同的向量对比方法得出的score是不一样的，
+            milvus中使用L2距离法，因此0为距离最近，最相似
+            cosine中使用余弦相似度，取值范围为[-1, 1], 1为最相似
+        '''
         # 从向量数据库中找到符合条件的数据id
         scores, indexs = self.cmp_map[algo].search(vector, limit)
         # 根据id查询图片信息并返回
@@ -88,10 +88,10 @@ class DBManager:
             res = self.mysql.select_one(id)
             result.append({
                 "id": id,
-                "score": scores[i],
+                "score": float(scores[i]),
                 "filename": res[0],
-                "filepath": res[1],
-                "filepath_small": res[2],
+                "filepath": get_download_url(cfg.FILE_SERVER_URL, res[1]),
+                "filepath_thumbnail": get_download_url(cfg.FILE_SERVER_URL, res[2]),
             })
         return result
 

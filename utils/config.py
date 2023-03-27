@@ -22,6 +22,8 @@ class RMFConfig:
 
     # support milvus|cosine
     CMP_MODE = "milvus"
+    # 同步模式，若开启，则删除现有milvus库，使用mysql中的数据重新建库
+    SYNC_MILVUS = False
 
     DB_HOST = "127.0.0.1"
     DB_PORT = 3306
@@ -66,6 +68,7 @@ class RMFConfig:
             "engine", "VIT_EXTRACT_AVG", fallback=self.VIT_EXTRACT_AVG)
         
         self.CMP_MODE = config.get("compare", "CMP_MODE", fallback=self.CMP_MODE)
+        self.SYNC_MILVUS = config.getboolean("compare", "SYNC_MILVUS", fallback=self.SYNC_MILVUS)
 
         self.DB_HOST = config.get("db", "DB_HOST", fallback=self.DB_HOST)
         self.DB_PORT = config.getint("db", "DB_PORT", fallback=self.DB_PORT)

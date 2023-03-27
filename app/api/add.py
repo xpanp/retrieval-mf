@@ -132,6 +132,7 @@ class DirProcess(threading.Thread):
                 print(self.progress_str() +
                       f"\nException:{e}\n{traceback.format_exc()}")
         task.delete(self.taskid)
+        print(f"taskid:{self.taskid} finished!")
 
 
 def add_dir():

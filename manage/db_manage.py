@@ -3,7 +3,7 @@ from typing import List
 
 from dao.orm_mysql import MySQL
 from dao.cosine import Cosine
-from dao.milvus import Milvus, connect
+from dao.milvus import Milvus, connect, drop_collection
 from utils.config import RMFConfig, cfg
 from core import AlgoType, algo_list, get_dim
 from utils.file_client import get_download_url
@@ -32,6 +32,11 @@ class DBManager:
             connect(cfg.MILVUS_HOST, cfg.MILVUS_PORT)
             print("milvus: start init and load vector to memory")
             self.milvus_init(cfg.DB_NAME)
+            if cfg.SYNC_MILVUS == True:
+                '''
+                    开启同步模式，则需要删除原有数据，从mysql中加载数据
+                '''
+                self.milvus_load()
             print("milvus: init success")
         elif cfg.CMP_MODE == CMPTYPE.COSINE.value:
             print("cosine: start init")
@@ -47,7 +52,21 @@ class DBManager:
             collection_name = db_name + "_" + algo_name
         '''
         for algo in algo_list:
+            if cfg.SYNC_MILVUS == True:
+                drop_collection(db_name + "_" + algo.value)
             self.cmp_map[algo] = Milvus(db_name + "_" + algo.value, get_dim(algo))
+
+    def milvus_load(self):
+        '''
+            从数据库中查询出所有数据，然后将数据加载到内存中
+        '''
+        print("milvus: select data from mysql")
+        result = self.mysql.select_all()
+        print("milvus: select success")
+        print("milvus: start load vector to memory")
+        for i, algo in enumerate(algo_list):
+            self.cmp_map[algo].insert([result[-1], result[i]])
+        print("milvus: load success")
 
     def cosine_init(self, db_name: str):
         for algo in algo_list:

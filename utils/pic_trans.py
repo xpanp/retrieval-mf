@@ -1,28 +1,22 @@
-import cv2
-from cv2 import Mat
-from typing import Optional
+from typing import List
+from pathlib import Path
 
 
-def reduce(src:Mat, dst_size:int) -> Optional[Mat]:
+img_extensions = ['jpg', 'jpeg', 'png', 'bmp']
+
+
+def get_img_files(dir: Path) -> List[Path]:
     '''
-        保持比例缩放，短边缩放至dst_size
-        若不需要缩放则返回None，否则返回缩放好的Mat
+        递归遍历文件夹，获取图片文件列表
     '''
-    height = src.shape[0]
-    width = src.shape[1]
-    if dst_size * 2 > min(width, height):
-        # 原图本来就很小，不需要缩放
-        return None
-
-    print(f'width: {width} height: {height}')
-    if width < height:
-        ratio = dst_size / float(src.shape[1])
-        width = dst_size
-        height = int(src.shape[0] * ratio)
-    else:
-        ratio = dst_size / float(src.shape[0])
-        height = dst_size
-        width = int(src.shape[1] * ratio)
-    print(f'width: {width} height: {height} ratio: {ratio}')
-    dst_image = cv2.resize(src, (width, height), interpolation=cv2.INTER_CUBIC)
-    return dst_image
+    img_files = []
+    for file_path in dir.rglob("*"):
+        if not file_path.is_file():
+            continue
+        '''
+            .suffix方法返回的文件后缀包含'.'
+            如 "test.jpg", 返回".jpg", 因此要去掉 '.'
+        '''
+        if file_path.suffix.lower()[1:] in img_extensions:
+            img_files.append(file_path)
+    return img_files

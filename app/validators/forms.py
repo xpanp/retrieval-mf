@@ -1,9 +1,11 @@
+from pathlib import Path
 from wtforms import StringField, IntegerField, FileField
 from wtforms.validators import DataRequired, NumberRange
 from flask_wtf.file import FileRequired, FileAllowed, FileSize
 
 from app.validators.base import BaseForm
 from core import AlgoType
+from utils.pic_trans import img_extensions
 
 '''
     request参数定义，指定字段并进行限制
@@ -12,7 +14,7 @@ from core import AlgoType
 class SearchForm(BaseForm):
     algo = StringField(validators=[DataRequired()])
     result_num = IntegerField(validators=[DataRequired(), NumberRange(min=1, max=30)])
-    file = FileField(validators=[FileRequired(), FileAllowed(['jpg','png','bmp']), FileSize(max_size=20*1024*1024)])
+    file = FileField(validators=[FileRequired(), FileAllowed(img_extensions), FileSize(max_size=20*1024*1024)])
 
     def validate_algo(self, value):
         try:
@@ -23,4 +25,16 @@ class SearchForm(BaseForm):
 
 class ADDPicForm(BaseForm):
     # 图片不应该超过20M，同时后缀名应该正确（大小写无关）
-    file = FileField(validators=[FileRequired(), FileAllowed(['jpg','png','bmp']), FileSize(max_size=20*1024*1024)])
+    file = FileField(validators=[FileRequired(), FileAllowed(img_extensions), FileSize(max_size=20*1024*1024)])
+
+class ADDDirForm(BaseForm):
+    # 文件夹路径必须是在服务器上真实存在的路径
+    dir = StringField(validators=[DataRequired()])
+
+    def validate_dir(self, dir):
+        try:
+            dir = Path(dir.data)
+            if not dir.is_dir():
+                raise IsADirectoryError(f"Can't find folder {dir.data} on target server")
+        except Exception as e:
+            raise e

@@ -23,6 +23,7 @@ class EngineManager:
             传统特征提取算法，多线程处理时不存在问题，
             仅为了保持接口一致方便调用
         '''
+        core_cfg.parser(cfg)
         engines = []
         for _ in range(cfg.NUM_WORKERS):
             algo = color.AlgoColor()
@@ -37,14 +38,13 @@ class EngineManager:
 
         engines = []
         for _ in range(cfg.NUM_WORKERS):
-            algo = lbp.AlgoLBP()
+            algo = lbp.AlgoLBP(core_cfg)
             engines.append(algo)
         self.engine_lbp = engine.EngineLock(engines)
 
         '''
             深度学习算法，实际需要进行管理的对象
         '''
-        core_cfg.parser(cfg)
         engines = []
         for _ in range(cfg.NUM_WORKERS):
             algo = vgg.AlgoVGG(core_cfg)

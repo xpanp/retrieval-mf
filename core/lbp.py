@@ -5,7 +5,7 @@ from typing import Union
 import numpy as np
 import torch
 
-from .utils import try_read_image
+from .utils import try_read_image, reduce, CoreCFG
 
 FEAT_DIM = 256
 
@@ -27,13 +27,19 @@ uniform_map = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 6: 5, 7: 6, 8: 7, 12: 8,
 
 
 class AlgoLBP:
-    def __init__(self) -> None:
-        pass
+    def __init__(self, cfg: CoreCFG) -> None:
+        self.cfg = cfg
 
     def forward_feature(self, img: Union[str, Mat]) -> torch.Tensor:
         img = try_read_image(img)
         if img is None:
             return torch.empty(0)
+        '''
+            由于LBP算法在图片较大时速度非常慢，因此需要对图片进行缩放。
+        '''
+        dst = reduce(img, self.cfg.ALGO_RESIZE)
+        if not dst is None:
+            img = dst
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
         basic_array = self.lbp_basic(img)

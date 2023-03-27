@@ -33,7 +33,7 @@ class Cosine:
                 # [embeddings, ] 
                 [[random() for j in range(dim)] for i in range(num_entities)],    
             ]
-            TODO 插入需要加锁
+            TODO: 插入需要加锁, 因为self.indexs与self.feats的append操作不可能同时完成。
         '''
         for i in range(len(entities[1])):
             if len(entities[1][i]) == self.dim:

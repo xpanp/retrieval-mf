@@ -52,3 +52,8 @@ class ServerError(APIException):
     code = 500
     msg = 'sorry, we made a mistake!'
     error_code = 2
+
+class LoginError(APIException):
+    code = 401
+    msg = 'token has expired'
+    error_code = 3

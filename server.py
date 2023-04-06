@@ -3,6 +3,7 @@ import argparse
 from utils.config import cfg
 from manage.engine_manage import engine_m
 from manage.db_manage import db_m
+from dao.mysql import db
 from app import create_app
 
 def get_args():
@@ -23,6 +24,7 @@ def main():
     # 特征提取引擎初始化
     engine_m.init(cfg)
     # 数据库模块初始化
+    db.init(cfg.DSN)
     db_m.init(cfg)
 
     # 将app封装，则系统与web框架分离

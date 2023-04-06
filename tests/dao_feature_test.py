@@ -3,7 +3,8 @@ sys.path.append("..")
 import random
 from sqlalchemy_utils import database_exists, drop_database
 
-from dao.orm_mysql import MySQL
+from dao.mysql import db
+from dao.feature import DATA_VECTOR
 
 
 def random_list(len:int) -> list:
@@ -13,21 +14,21 @@ dsn = "mysql+pymysql://root:LWsVjzKIO0FTdA==@127.0.0.1:3306/rmf_test1?charset=ut
 if database_exists(dsn):
     drop_database(dsn)
 
-db = MySQL()
 db.init(dsn)
+DATA_VECTOR.check_and_create_table()
 
-id = db.insert(filename="test.jpg", filepath="http://127.0.0.1/test.jpg", filepath_thumbnail="http://127.0.0.1/test_small.jpg",
+id = DATA_VECTOR.insert(filename="test.jpg", filepath="http://127.0.0.1/test.jpg", filepath_thumbnail="http://127.0.0.1/test_small.jpg",
           color=random_list(4), glcm=random_list(4), lbp=random_list(0), vgg=random_list(4), vit=random_list(4))
 print("------------------------------")
 print("insert id:", id)
 print("------------------------------")
 
-res = db.select_one(1)
+res = DATA_VECTOR.select_one(1)
 print("------------------------------")
 print(res)
 print("------------------------------")
 
-res = db.select_all()
+res = DATA_VECTOR.select_all()
 print("------------------------------")
 print(res)
 print("------------------------------")

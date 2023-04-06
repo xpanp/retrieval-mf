@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import List
 
-from dao.orm_mysql import MySQL
+from dao.feature import DATA_VECTOR
 from dao.cosine import Cosine
 from dao.milvus import Milvus, connect, drop_collection
 from utils.config import RMFConfig, cfg
@@ -21,12 +21,10 @@ class DBManager:
     '''
 
     def __init__(self) -> None:
-        self.mysql = MySQL()
         self.cmp_map = {}
 
     def init(self, cfg: RMFConfig):
-        self.mysql.init(cfg.DSN)
-
+        DATA_VECTOR.check_and_create_table()
         if cfg.CMP_MODE == CMPTYPE.MILVUS.value:
             # 与milvus数据库建连
             connect(cfg.MILVUS_HOST, cfg.MILVUS_PORT)
@@ -61,7 +59,7 @@ class DBManager:
             从数据库中查询出所有数据，然后将数据加载到内存中
         '''
         print("milvus: select data from mysql")
-        result = self.mysql.select_all()
+        result = DATA_VECTOR.select_all()
         print("milvus: select success")
         print("milvus: start load vector to memory")
         for i, algo in enumerate(algo_list):
@@ -77,7 +75,7 @@ class DBManager:
             从数据库中查询出所有数据，然后将数据加载到内存中
         '''
         print("cosine: select data from mysql")
-        result = self.mysql.select_all()
+        result = DATA_VECTOR.select_all()
         print("cosine: select success")
         print("cosine: start load vector to memory")
         for i, algo in enumerate(algo_list):
@@ -86,7 +84,7 @@ class DBManager:
 
     def insert(self, filename: str, filepath: str, filepath_thumbnail: str, vectors: List[List[float]]):
         # 插入mysql
-        id = self.mysql.insert(
+        id = DATA_VECTOR.insert(
             filename, filepath, filepath_thumbnail, 
             vectors[0], vectors[1], vectors[2], vectors[3], vectors[4])
         # 将数据加入向量数据库
@@ -104,7 +102,7 @@ class DBManager:
         # 根据id查询图片信息并返回
         result = []
         for i, id in enumerate(indexs):
-            res = self.mysql.select_one(id)
+            res = DATA_VECTOR.select_one(id)
             result.append({
                 "id": id,
                 "score": float(scores[i]),

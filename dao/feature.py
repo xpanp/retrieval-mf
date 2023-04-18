@@ -72,9 +72,20 @@ class DATA_VECTOR(Base):
             vgg=vgg,
             vit=vit,
         )
-        with db.auto_commit(raise_flag=True):
-            db.session.add(instance)
-        id = instance.id
+
+        session = db.get_session()
+        try:
+            session.add(instance)
+            session.commit()
+            # commit成功以后才可以得到对应的id
+            id = instance.id
+        except Exception as e:
+            print(e)
+            session.rollback()
+            raise e
+        finally:
+            if session:
+                session.close()
         return id
     
     @staticmethod
@@ -84,8 +95,8 @@ class DATA_VECTOR(Base):
             以列的方式返回所有数据，便于比对数据库将数据载入内存中
             算法特征返回顺序参照core.algo_list，将ids放在最后一位
         '''
-        with db.auto_commit(raise_flag=False):
-            result = db.session.query(DATA_VECTOR.id, DATA_VECTOR.color, DATA_VECTOR.glcm, 
+        with db.auto_commit(raise_flag=False) as session:
+            result = session.query(DATA_VECTOR.id, DATA_VECTOR.color, DATA_VECTOR.glcm, 
                                         DATA_VECTOR.lbp, DATA_VECTOR.vgg, DATA_VECTOR.vit).all()
         
         ids = []    # List[int]
@@ -113,8 +124,8 @@ class DATA_VECTOR(Base):
 
     @staticmethod
     def select_one(id:int) -> tuple:
-        with db.auto_commit(raise_flag=False):
-            result = db.session.query(
+        with db.auto_commit(raise_flag=False) as session:
+            result = session.query(
                 DATA_VECTOR.filename, DATA_VECTOR.filepath, DATA_VECTOR.filepath_thumbnail
             ).filter(
                 DATA_VECTOR.id == id

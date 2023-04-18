@@ -17,21 +17,21 @@ if database_exists(dsn):
 db.init(dsn)
 DATA_VECTOR.check_and_create_table()
 
+print("1------------------------------1")
 id = DATA_VECTOR.insert(filename="test.jpg", filepath="http://127.0.0.1/test.jpg", filepath_thumbnail="http://127.0.0.1/test_small.jpg",
           color=random_list(4), glcm=random_list(4), lbp=random_list(0), vgg=random_list(4), vit=random_list(4))
-print("------------------------------")
 print("insert id:", id)
-print("------------------------------")
+print("1------------------------------1")
 
+print("2------------------------------2")
 res = DATA_VECTOR.select_one(1)
-print("------------------------------")
 print(res)
-print("------------------------------")
+print("2------------------------------2")
 
+print("3------------------------------3")
 res = DATA_VECTOR.select_all()
-print("------------------------------")
 print(res)
-print("------------------------------")
+print("3------------------------------3")
 
 if database_exists(dsn):
     drop_database(dsn)

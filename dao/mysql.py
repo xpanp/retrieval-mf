@@ -32,23 +32,36 @@ class MySQL():
         if not database_exists(self.engine.url):
             create_database(self.engine.url)
 
-        # 绑定引擎
-        # 创建数据库链接池，直接使用session即可为当前线程拿出一个链接对象conn
-        # 内部会采用threading.local进行隔离
-        self.session = scoped_session(sessionmaker(bind=self.engine))
+
+    def get_session(self):
+        return scoped_session(sessionmaker(bind=self.engine))
+
 
     @contextmanager
     def auto_commit(self, raise_flag=True):
         '''
             raise_flag: 是否抛出异常
         '''
+        # 绑定引擎
+        # 创建数据库链接池，直接使用session即可为当前线程拿出一个链接对象conn
+        # 内部会采用threading.local进行隔离
+        session = self.get_session()
         try:
-            yield
-            self.session.commit()
+            yield session
+            session.commit()
         except Exception as e:
             print(e)
-            self.session.rollback()
+            session.rollback()
             if raise_flag:
                 raise e
+        finally:
+            '''
+                Close out the transactional resources and ORM objects used by this Session.
+                Proxied for the Session class on behalf of the scoped_session class.
+                若不进行关闭，可能导致如删除表这类操作卡住
+                这里只是将连接释放到连接池，并不是真正关闭了该连接
+            '''
+            if session:
+                session.close()
 
 db = MySQL()

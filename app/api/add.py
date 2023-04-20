@@ -10,7 +10,7 @@ from typing import List
 import time
 
 from app.validators.forms import ADDPicForm, ADDDirForm
-from app.utils.error_type import ServerError, ParameterException
+from app.utils.error_type import ServerError, ParameterException, Success
 from app.utils import task
 from utils.config import cfg
 from utils.file_client import upload
@@ -19,6 +19,7 @@ from manage.engine_manage import engine_m
 from manage.db_manage import db_m
 from core import algo_list
 from core.utils import reduce
+from app.utils.jwt_verify import verify_token
 
 
 def get_thumbnail_name(filepath: str) -> str:
@@ -72,6 +73,7 @@ def _add_pic(filepath: Path):
                 filepath_thumbnail=file_th_url, vectors=vectors)
 
 
+@verify_token
 def add_pic():
     '''
         添加一张图片至检索系统中
@@ -91,8 +93,8 @@ def add_pic():
     finally:
         # 删除临时文件
         os.remove(filepath)
-
-    return Response(json.dumps({"msg": "add_pic success"}), status=200, mimetype='application/json')
+    
+    return Success(msg="add_pic success")
 
 
 class DirProcess(threading.Thread):
@@ -135,6 +137,7 @@ class DirProcess(threading.Thread):
         print(f"taskid:{self.taskid} finished!")
 
 
+@verify_token
 def add_dir():
     '''
         从文件夹批量添加图片，需提前将图片放在服务器可以访问到的文件夹下，后台处理。
@@ -155,7 +158,15 @@ def add_dir():
     dp.start()
 
     return Response(json.dumps({
+        "code": 0,
         "msg": "add_dir start process",
-        "taskid": dp.get_taskid(),
-        "task_nums": dp.get_total_num()
+        "data": {
+            "taskid": dp.get_taskid(),
+            "task_nums": dp.get_total_num()
+        }
     }), status=200, mimetype='application/json')
+
+
+'''
+    TODO 根据任务ID号返回处理状态
+'''

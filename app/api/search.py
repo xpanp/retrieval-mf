@@ -11,8 +11,16 @@ from app.utils.error_type import ServerError
 from manage.engine_manage import engine_m
 from manage.db_manage import db_m
 from utils.config import cfg
+from app.utils.jwt_verify import verify_token
 
+
+@verify_token
 def search():
+    '''
+        TODO: 
+        参数：增加融合算法，增加截图位置参数
+        返回：增加任务id，便于反馈
+    '''
     # 参数验证
     form = SearchForm(CombinedMultiDict([request.form, request.files]))
     form.validate()
@@ -39,4 +47,5 @@ def search():
         os.remove(filepath)
  
     print(result)
-    return Response(json.dumps({"msg": "ok", "compare_mode": cfg.CMP_MODE,"result": result}), status=200, mimetype='application/json')
+    return Response(json.dumps({"code": 0, "msg": "ok", "data":{"compare_mode": cfg.CMP_MODE, "result": result}}), 
+                    status=200, mimetype='application/json')

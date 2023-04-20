@@ -13,8 +13,8 @@ def verify_token(token:str) -> Dict[str, Any]:
     info = pyjwt.decode(jwt=token, key=salt, algorithms='HS256')
     return info
 
-def creat_token(uid:str):
+def creat_token(uid:str, scope:str):
     now = int(time.time())
-    payload = {'uid': uid, 'time': now, 'exp': now + max_time}
+    payload = {'uid': uid, 'scope': scope, 'time': now, 'exp': now + max_time}
     token = pyjwt.encode(payload=payload, key=salt, algorithm='HS256', headers=headers)
     return token

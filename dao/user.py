@@ -28,6 +28,9 @@ class User(Base):
         if not inspect(db.engine).has_table(User.__tablename__):
             # Base.metadata.drop_all(db.engine) # 删除表
             Base.metadata.create_all(db.engine) # 创建表
+            # 创建管理员用户
+            print("create admin account!")
+            User.register_by_email("admin", "admin@qq.com", "nimdappp", AdminScope)
     
     @property
     def password(self):
@@ -50,11 +53,12 @@ class User(Base):
         self._password = generate_password_hash(raw)
 
     @staticmethod
-    def register_by_email(name:str, email:str, passwd:str) -> int:
+    def register_by_email(name:str, email:str, passwd:str, auth:int=UserScope) -> int:
         user = User()
         user.nickname = name
         user.email = email
         user.password = passwd
+        user.auth = auth
 
         session = db.get_session()
         try:

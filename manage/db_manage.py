@@ -24,7 +24,6 @@ class DBManager:
         self.cmp_map = {}
 
     def init(self, cfg: RMFConfig):
-        DATA_VECTOR.check_and_create_table()
         if cfg.CMP_MODE == CMPTYPE.MILVUS.value:
             # 与milvus数据库建连
             connect(cfg.MILVUS_HOST, cfg.MILVUS_PORT)

@@ -1,11 +1,12 @@
 from pathlib import Path
 from wtforms import StringField, IntegerField, FileField
-from wtforms.validators import DataRequired, NumberRange
+from wtforms.validators import DataRequired, NumberRange, length, Email, Regexp, ValidationError
 from flask_wtf.file import FileRequired, FileAllowed, FileSize
 
 from app.validators.base import BaseForm
 from core import AlgoType
 from utils.pic_trans import img_extensions
+from app.utils.enums import ClientTypeEnum
 
 '''
     request参数定义，指定字段并进行限制
@@ -38,3 +39,27 @@ class ADDDirForm(BaseForm):
                 raise IsADirectoryError(f"Can't find folder {dir.data} on target server")
         except Exception as e:
             raise e
+        
+
+class ClientForm(BaseForm):
+    '''
+        登录
+    '''
+    account = StringField(validators=[DataRequired(message='account is required'), length(min=5, max=32)])
+    passwd = StringField()
+    type = IntegerField(validators=[DataRequired()])
+
+    def validate_type(self, value):
+        try:
+            client = ClientTypeEnum(value.data)
+        except ValueError as e:
+            raise e
+        self.type.data = client
+
+class UserEmailForm(ClientForm):
+    '''
+        使用email进行注册
+    '''
+    account = StringField(validators=[Email(message='invalidate email')])
+    passwd = StringField(validators=[DataRequired(), Regexp(r'^[A-Za-z0-9_*&$#@]{6,22}$')])
+    nickname = StringField(validators=[DataRequired(), length(min=2, max=22)])

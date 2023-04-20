@@ -1,7 +1,7 @@
 import sys
 sys.path.append('../')
 import time
-from jwt import ExpiredSignatureError
+from jwt import ExpiredSignatureError, InvalidSignatureError
 
 from utils import jwt
 
@@ -12,6 +12,12 @@ print(token)
 
 info = jwt.verify_token(token)
 print(info)
+
+try:
+    info = jwt.verify_token(token+'123')
+    print(info)
+except InvalidSignatureError as e:
+    print(e)
 
 time.sleep(2)
 try:

@@ -15,6 +15,7 @@ class AlgoType(Enum):
     LBP = "lbp"
     VGG = "vgg"
     VIT = "vit"
+    FUSION = "fusion"
 
 algo_list = [AlgoType.COLOR, AlgoType.GLCM, AlgoType.LBP, AlgoType.VGG, AlgoType.VIT]
 

@@ -3,17 +3,16 @@ from werkzeug.utils import secure_filename
 from werkzeug.datastructures import CombinedMultiDict
 import json
 import os
-import time
 import traceback
 import cv2
 
 from app.validators.forms import SearchForm, FeedbackForm
 from app.utils.error_type import Success, ServerError
-from manage.engine_manage import engine_m
-from manage.db_manage import db_m
+from manage.fusion import fusion, single_algo_process
 from utils.config import cfg
 from app.utils.jwt_verify import verify_token
 from app.utils import task
+from core import AlgoType
 
 
 def check_and_intercept(filepath:str, x_min, y_min, x_max, y_max) -> bool:
@@ -52,14 +51,17 @@ def search():
         msg = "uncut pictures"
 
     try:
-        t1 = time.time()
-        # 特征提取
-        vector = engine_m.process(form.algo, filepath)
-        t2 = time.time()
-        # 特征检索
-        result = db_m.search(algo=form.algo, vector=vector.tolist(), limit=form.result_num.data)
-        t3 = time.time()
-        print(f'特征提取:{t2-t1}s 特征检索:{t3-t2}s')
+        taskid = task.generate_task_id()
+        if form.algo != AlgoType.FUSION:
+            '''
+                非融合算法则直接根据指定算法进行处理
+            '''
+            result = single_algo_process(form.algo, filepath, form.result_num.data)
+        else:
+            '''
+                融合算法
+            '''
+            result = fusion.process(taskid=taskid, data=filepath, limit=form.result_num.data)
     except Exception as e:
         print(f"ip:{request.remote_addr} Exception:{e}\n{traceback.format_exc()}")
         raise ServerError(msg=str(e))
@@ -71,7 +73,7 @@ def search():
     return Response(json.dumps({"code": 0, 
                                 "msg": msg, 
                                 "data":{
-                                    "taskid": task.generate_task_id(),
+                                    "taskid": taskid,
                                     "compare_mode": cfg.CMP_MODE, 
                                     "result": result
                                     }
@@ -85,6 +87,10 @@ def feedback():
     form = FeedbackForm(request.form)
     form.validate()
 
-    # TODO 实现动态反馈调整权重算法
+    try:
+        fusion.feedback(taskid=form.taskid.data, pictureid=form.pictureid.data, type=form.type.data)
+    except Exception as e:
+        # 即使有错误也不用返回，对用户来说是无感的
+        print(f"ip:{request.remote_addr} Exception:{e}\n{traceback.format_exc()}")
 
     return Success()

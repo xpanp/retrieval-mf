@@ -6,7 +6,8 @@ from flask_wtf.file import FileRequired, FileAllowed, FileSize
 from app.validators.base import BaseForm
 from core import AlgoType
 from utils.pic_trans import img_extensions
-from app.utils.enums import ClientTypeEnum, FeedbackEnum
+from app.utils.enums import ClientTypeEnum
+from manage.fusion import FeedbackEnum
 
 '''
     request参数定义，指定字段并进行限制

@@ -5,22 +5,39 @@ import json
 import os
 import time
 import traceback
+import cv2
 
-from app.validators.forms import SearchForm
-from app.utils.error_type import ServerError
+from app.validators.forms import SearchForm, FeedbackForm
+from app.utils.error_type import Success, ServerError
 from manage.engine_manage import engine_m
 from manage.db_manage import db_m
 from utils.config import cfg
 from app.utils.jwt_verify import verify_token
+from app.utils import task
 
+
+def check_and_intercept(filepath:str, x_min, y_min, x_max, y_max) -> bool:
+    '''
+        若定义的矩形框位置合法，则裁剪原图并保存到原来的图片位置
+    '''
+    if x_min is None or x_max is None or y_min is None or y_max is None:
+        return False
+    
+    if x_min < 0 or x_min > x_max or y_min < 0 or y_min > y_max:
+        return False
+    
+    img = cv2.imread(filepath)
+    height = img.shape[0]
+    width = img.shape[1]
+    if x_max >= width or y_max >= height:
+        return False
+    
+    img = img[y_min:y_max, x_min:x_max]
+    cv2.imwrite(filepath, img)
+    return True
 
 @verify_token
 def search():
-    '''
-        TODO: 
-        参数：增加融合算法，增加截图位置参数
-        返回：增加任务id，便于反馈
-    '''
     # 参数验证
     form = SearchForm(CombinedMultiDict([request.form, request.files]))
     form.validate()
@@ -29,6 +46,10 @@ def search():
     # 保存文件
     filepath = os.path.join(cfg.TMP_DIR, secure_filename(file.filename))
     file.save(filepath)
+    # 根据矩形框裁剪图片
+    msg = "ok"
+    if not check_and_intercept(filepath, form.x_min.data, form.y_min.data, form.x_max.data, form.y_max.data):
+        msg = "uncut pictures"
 
     try:
         t1 = time.time()
@@ -47,5 +68,23 @@ def search():
         os.remove(filepath)
  
     print(result)
-    return Response(json.dumps({"code": 0, "msg": "ok", "data":{"compare_mode": cfg.CMP_MODE, "result": result}}), 
+    return Response(json.dumps({"code": 0, 
+                                "msg": msg, 
+                                "data":{
+                                    "taskid": task.generate_task_id(),
+                                    "compare_mode": cfg.CMP_MODE, 
+                                    "result": result
+                                    }
+                                }), 
                     status=200, mimetype='application/json')
+
+
+@verify_token
+def feedback():
+    # 参数验证
+    form = FeedbackForm(request.form)
+    form.validate()
+
+    # TODO 实现动态反馈调整权重算法
+
+    return Success()

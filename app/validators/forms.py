@@ -6,7 +6,7 @@ from flask_wtf.file import FileRequired, FileAllowed, FileSize
 from app.validators.base import BaseForm
 from core import AlgoType
 from utils.pic_trans import img_extensions
-from app.utils.enums import ClientTypeEnum
+from app.utils.enums import ClientTypeEnum, FeedbackEnum
 
 '''
     request参数定义，指定字段并进行限制
@@ -15,6 +15,10 @@ from app.utils.enums import ClientTypeEnum
 class SearchForm(BaseForm):
     algo = StringField(validators=[DataRequired()])
     result_num = IntegerField(validators=[DataRequired(), NumberRange(min=1, max=30)])
+    x_min = IntegerField()
+    y_min = IntegerField()
+    x_max = IntegerField()
+    y_max = IntegerField()
     file = FileField(validators=[FileRequired(), FileAllowed(img_extensions), FileSize(max_size=20*1024*1024)])
 
     def validate_algo(self, value):
@@ -23,6 +27,19 @@ class SearchForm(BaseForm):
         except ValueError as e:
             raise e
         self.algo = algo
+
+class FeedbackForm(BaseForm): 
+    taskid = StringField(validators=[DataRequired()])
+    pictureid = IntegerField(validators=[DataRequired()])
+    type = IntegerField(validators=[DataRequired()])
+
+    def validate_type(self, value):
+        try:
+            v = FeedbackEnum(value.data)
+        except ValueError as e:
+            raise e
+        self.type.data = v
+
 
 class ADDPicForm(BaseForm):
     # 图片不应该超过20M，同时后缀名应该正确（大小写无关）
@@ -60,6 +77,6 @@ class UserEmailForm(ClientForm):
     '''
         使用email进行注册
     '''
-    account = StringField(validators=[Email(message='invalidate email')])
+    account = StringField(validators=[DataRequired(), Email(message='invalidate email')])
     passwd = StringField(validators=[DataRequired(), Regexp(r'^[A-Za-z0-9_*&$#@]{6,22}$')])
     nickname = StringField(validators=[DataRequired(), length(min=2, max=22)])

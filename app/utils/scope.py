@@ -22,7 +22,7 @@ class AdminScope(Scope):
 
 
 class UserScope(Scope):
-    allow_api = ['search']
+    allow_api = ['search', 'feedback']
 
 
 scope_map = {"UserScope": UserScope(), "AdminScope":AdminScope()}

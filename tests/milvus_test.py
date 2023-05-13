@@ -14,11 +14,12 @@ drop_collection(collection_name)
 
 milvus = Milvus(collection_name=collection_name, dim=512)
 
-entities = [
-    [i for i in range(num_entities)],
-    rng.random((num_entities, 512)),    # field embeddings, supports numpy.ndarray and list
-]
-milvus.insert(entities)
+for _ in range(1):
+	entities = [
+    	[i for i in range(num_entities)],
+    	rng.random((num_entities, 512)),    # field embeddings, supports numpy.ndarray and list
+	]
+	milvus.insert(entities)
 
 start_time = time.time()
 scores, indexs = milvus.search(entities[1][7], limit=12)

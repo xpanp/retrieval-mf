@@ -7,6 +7,10 @@ from app.utils.error_type import Success, RegisterError, LoginError
 from dao.user import User
 from utils.jwt import creat_token
 
+'''
+    TODO 更多用户管理接口待实现，如改密，管理员增删改普通用户等
+'''
+
 def register():
     '''
         用户注册，使用email注册账户

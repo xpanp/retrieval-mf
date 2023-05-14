@@ -146,7 +146,7 @@ json
 }
 ```
 
-### 以目录形式增加图片
+### 批量添加图片
 
 仅管理员可操作！
 
@@ -196,6 +196,59 @@ json
     "msg": "add_dir start process",
     "data": {
         "taskid": "task-1681991139840",
+        "task_nums": 102
+    }
+}
+```
+
+### 查看批量任务状态
+
+批量添加图片接口在后台进行，其任务状态可由该接口查看。
+
+**method** 
+
+post
+
+**url**
+
+`/api/add_dir/status`
+
+**请求参数**
+
+form
+
+| 参数名称 | 参数类型 | 是否必填 | 参数描述 |
+| :------- | :------- | :------- | :------- |
+| taskid   | string   | 是       | 任务号   |
+
+**请求参数示例**
+
+![img](pic/add_dir_status.png)
+
+**返回数据**
+
+json
+
+| 数据名称       | 数据类型 | 是否必填 | 数据描述               |
+| -------------- | -------- | -------- | ---------------------- |
+| code           | int      | 是       | 自定义状态码，0为正常  |
+| msg            | string   | 是       | 信息，异常返回错误信息 |
+| data           | object   | 否       | 具体数据               |
+| taskid         | string   | 是       | 任务号                 |
+| processed_nums | int      | 是       | 当前已经完成的任务数量 |
+| task_nums      | int      | 是       | 总任务数               |
+
+**返回数据示例**
+
+Note: 若`processed_nums`与`task_nums`相等，则表示该任务已经完成。
+
+```json
+{
+    "code": 0,
+    "msg": "ok",
+    "data": {
+        "taskid": "task-1684051220872",
+        "processed_nums": 8,
         "task_nums": 102
     }
 }

@@ -3,6 +3,7 @@ import argparse
 from utils.config import cfg
 from manage.engine_manage import engine_m
 from manage.db_manage import db_m
+from manage.fusion import fusion
 from dao.mysql import db
 from dao.feature import DATA_VECTOR
 from dao.user import User
@@ -27,6 +28,8 @@ def main():
     engine_m.init(cfg)
     # 数据库模块初始化
     db.init(cfg.DSN)
+    # 特征融合模块初始化
+    fusion.init(cfg)
     '''
         这里表的检查顺序很重要。
         检查第一张表时，若其他表不存在，也会一起创建。

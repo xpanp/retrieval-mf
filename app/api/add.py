@@ -9,7 +9,7 @@ import threading
 from typing import List
 import time
 
-from app.validators.forms import ADDPicForm, ADDDirForm
+from app.validators.forms import ADDPicForm, ADDDirForm, StatusForm
 from app.utils.error_type import ServerError, ParameterException, Success
 from app.utils import task
 from utils.config import cfg
@@ -124,7 +124,7 @@ class DirProcess(threading.Thread):
     def run(self):
         for i, file in enumerate(self.img_files):
             try:
-                self.process_num = i
+                self.process_num = i + 1
                 print(self.progress_str(), "start")
                 t1 = time.time()
                 _add_pic(file)
@@ -143,11 +143,15 @@ def add_dir():
         从文件夹批量添加图片，需提前将图片放在服务器可以访问到的文件夹下，后台处理。
         TODO: 数据库的插入应该是批量操作，可以比如每1000张图片提交一次。
         TODO: 由于是批量处理，应该申请一个handle以后一直持有，直到处理完成。
+        TODO: 可以将任务相关信息添加到数据库中
     '''
     form = ADDDirForm(request.form)
     form.validate()
     dir = Path(form.dir.data)
 
+    if task.task_len() != 0:
+        raise ServerError(
+            msg=f"Lack of resources, {task.task_len()} task is being processed.")
     img_files = get_img_files(dir)
     if len(img_files) == 0:
         raise ParameterException(
@@ -168,5 +172,25 @@ def add_dir():
 
 
 '''
-    TODO 根据任务ID号返回处理状态
+    根据任务ID号返回处理状态
 '''
+def get_status():
+    form = StatusForm(request.form)
+    form.validate()
+    taskid = form.taskid.data
+
+    try:
+        dp = task.get(taskid)
+    except Exception as e:
+        print(f"\nException:{e}\n{traceback.format_exc()}")
+        raise ParameterException(msg=f"Can't find taskid {taskid}")
+
+    return Response(json.dumps({
+        "code": 0,
+        "msg": "ok",
+        "data": {
+            "taskid": taskid,
+            "processed_nums": dp.get_process_num(),
+            "task_nums": dp.get_total_num()
+        }
+    }), status=200, mimetype='application/json')

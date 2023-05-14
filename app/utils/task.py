@@ -7,7 +7,12 @@ import time
     工作线程结束以后也只会删除该task，因此也是线程安全的。
     详情见: https://docs.python.org/3.9/faq/library.html#what-kinds-of-global-value-mutation-are-thread-safe
 '''
+
+'''
+    正在处理的任务放入task中，已经处理完成的任务放入task_finished中。
+'''
 task = {}
+task_finished = {}
 
 
 def generate_task_id() -> str:
@@ -17,13 +22,26 @@ def generate_task_id() -> str:
     return task_id
 
 
+def task_len():
+    return len(task)
+
+
 def add(key: str, value):
     task[key] = value
 
 
 def get(key: str):
-    return task[key]
+    '''
+        若两个map中都不存在key，则抛出异常
+    '''
+    if key in task:
+        return task[key]
+    return task_finished[key]
 
 
 def delete(key: str):
+    '''
+        从待处理map加入完成map
+    '''
+    task_finished[key] = task[key]
     del task[key]

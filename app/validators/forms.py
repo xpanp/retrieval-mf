@@ -57,6 +57,9 @@ class ADDDirForm(BaseForm):
                 raise IsADirectoryError(f"Can't find folder {dir.data} on target server")
         except Exception as e:
             raise e
+
+class StatusForm(BaseForm):
+    taskid = StringField(validators=[DataRequired()])
         
 
 class ClientForm(BaseForm):

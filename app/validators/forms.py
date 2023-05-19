@@ -54,7 +54,7 @@ class ADDDirForm(BaseForm):
         try:
             dir = Path(dir.data)
             if not dir.is_dir():
-                raise IsADirectoryError(f"Can't find folder {dir.data} on target server")
+                raise IsADirectoryError(f"Can't find folder {dir} on target server")
         except Exception as e:
             raise e
 

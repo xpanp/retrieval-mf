@@ -14,7 +14,7 @@ post
 
 **url**
 
-`/user/register`
+`/api/user/register`
 
 **请求参数**
 
@@ -61,7 +61,7 @@ post
 
 **url**
 
-`/user/login`
+`/api/user/login`
 
 **请求参数**
 
